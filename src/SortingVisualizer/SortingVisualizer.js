@@ -191,7 +191,7 @@ const SortingVisualizer = (props) => {
         <div>
             {/*This div has generate and run algorithm buttons inside*/}
             <div>
-                <div className='pt1' style={{display: 'flex', justifyContent: 'flex-end'}}>
+                <div className='pt1 dib'>
                     <button 
                         ref={generateBtn}
                         id='generate'

@@ -4,7 +4,7 @@ const Home = () => {
 	return (
 		// This div contains a welcome greeting phrase and 
 		// brief introduction of each sorting algorithm.
-		<div className='mt2' style={{height: '75vh', color: 'lightgrey'}}>
+		<div className='ma5' style={{height: '100%', color: 'lightgrey'}}>
 	        <h1>Welcome to my sorting visualizer</h1><br />
 
 	        <p className="b f4">This sorting visualizer webpage will be included 
