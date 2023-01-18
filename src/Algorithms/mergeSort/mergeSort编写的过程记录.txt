@@ -1,0 +1,172 @@
+在设计如果实现的merge sort过程中，我遇到了以下的几个需要解决的问题:
+1. 因为它和bubble sort, selection sort和insertion sort不一样, 它们三个只是简单的loop, 没有任何return, 而merge sort的实现过程是使用devide & conquer strategy, 所以是recursive算法, 就会一直有return, 而且每次return都是新的array, 所以一开始给了我一个难题是应该要怎么实现merge sort animation, 因为这和我前面几个算法的animation做法很不一样.
+
+2. 因为每次return都是新的array, 所以我一定要解决如何在原有的numArr和colorArr里, 精确的找出相对应需要做出update的位置. 
+
+3. 在我的理解里, merge sort主要分split和merge的部分, 我一定要很清楚每一步的运作的走向, 才能对准每一步去更新颜色.
+
+---------------------------------------------------------------------------------------------
+
+前提 - 因为在写bubble, selection和insertion的时候, 我最初是想用object的形式把array里面的元素分别用number和color这两个property支棱起来的, 然后我当时也只会用setTimeout来做animation, 结果object + setTimeout的组合弄不到我需要的效果, 我也不知道其失败的原因. 所以后来我干脆在sortingVisualizer里设定了随机衍生出来的array是分开用 numArr和colorArr分别装起来, 然后它们的元素时相呼应的.
+
+-------------------------------------------
+
+在苦思冥想和观察算法排序过程后, 我得出来一些难点和与之对应的解决方法:
+
+1. 我们需要整个过程都会衍生很多个新的array, 所以我们需要一个记录变量来把这些储存起来, 之后用来做animation时使用.
+2. 每一次算法在split的时候, 都是先往左split到只剩一个, 然后往右split到也只剩一个, 当它们都只剩下一个的时候就会进入merge阶段的, 然后开始往上merge到需要再度进入split为止, 对应解决的方法就是用pop().
+3. 我们需要一些变量来精准掌握进入merge时, 我们需要在原有numArr和colorArr的哪些位置做更改. 这也是本次的难点. 
+
+-------------------------------------------
+
+我在merge sort的实现过程中多开了两个变量, 一个是mergeRangeRecord(对应解决的是第1个难点), 另一个是indexArr(对应解决的是第2个难点).
+
+mergeRangeRecord是用来记录每一步numArr和colorArr的变化的过程, 它的储存形式是这样的:
+mergeRangeRecord = [ 
+  [[23, 14, 1, 6, 24], ['#FF8200', '#FF8200', '#FF8200', '#FF8200', '#FF8200']],
+  [[23, 14, 1, 6, 24], ['#F2F0A1', '#FF8200', '#FF8200', '#FF8200', '#FF8200']],
+  ...
+] 
+这个mergeRangeRecord所储存起来的东西可以让我在之后可以轻轻松松的就把animation实现了.
+
+-------------------------------------------
+
+而indexArr则是跟numArr对应的, 它的储存形式如下:
+numArr = [23, 14, 1, 6 ,24];
+indexArr = [0, 1, 2, 3, 4];
+
+在merge sort里, 每一次merge sort的迭代都把原先的array砍一半, 再把刚砍的那一半重新生成一个array的, 所以这个过程就会丢失原先它在numArr所对应的index, 为了解决这个问题, indexArr就应运而生, merge sort怎么迭代array的, 它也怎么被砍半. 比如:
+[23, 14, 1, 6, 24]    对应的    [0, 1, 2, 3, 4]
+[23, 14]              对应的    [0, 1]
+[1, 6 ,24]            对应的    [2, 3, 4]
+[6, 24]               对应的    [3, 4]
+(我们这里不需要记录单个的array是因为indexArr的主要作用是使用在merge, 而merge是至少需要2个元素(左边右边各一个)才会进入该阶段的)
+
+-------------------------------------------
+
+然后在merge的阶段我在mergeRangeRecord用上pop(), 就可以精准掌握每一次更新的位置. 
+
+因为pop是把mergeRangeRecord的最后一个元素删除并返回, 因为有返回, 我们就删除的同时使用另一个变量把pop out的元素储存起来, 然后在merge里使用. 
+
+透过我对merge sort的观察发现, 我们每次都是只有2个元素时才进入merge的阶段, 而当前的2个元素merge好后, 接着在mergeRangeRecord里往上trace就是下一部分需要merge的范围, 然后直到最初开头的那个mergeRangeRecord的index 0, 例子里也就是[23, 14, 1, 6 ,24], merge sort就也刚好到下一个split的阶段了, 直到最后的最后才会用到mergeRangeRecord[0], 这也是恰到好处的让能使用上pop()这个功能.
+
+-------------------------------------------
+
+写一个缩小版的过程吧:
+
+const getMergeSortSteps = (numArr, colorArr, indexArr, stepRecord, mergeRangeRecord) => {
+	
+
+
+	const mergeSort = (array, indexArray) => {
+		// 当numArr被分割到只剩一个的时候, 返回
+		if (array.length <= 1) {
+			return array;
+		}
+
+		// 就在这里添加每一个indexArr进去mergeRangeRecord
+		mergeRangeRecord.push(indexArray);
+
+		// 在这里把numArr对半切然后放上去stack, 把left分到只剩一个后, 
+		// 开始把之前切下来的right分, 把right也分到只剩一个后,
+		// 就开始merge
+		const middle = Math.floor(array.length / 2);
+		const left = array.slice(0, middle);
+		const right = array.slice(middle);
+
+		// 这里就是我说numArr怎么切, 我就怎么把indexArr也切一切, 
+		// 与之对应起来
+		const indexLeft = indexArray.slice(0, middle);
+		const indexRight = indexArray.slice(middle);
+
+		// Recursive call就发生在这里, 再次进入, 切半, 再进入, 再切半, 直到只剩一个返回.
+		// indexArr被切出来的indexLeft和indexRight也跟进去被切了.
+		const sortedLeft = mergeSort(left, 0, middle, indexLeft);
+		const sortedRight = mergeSort(right, middle, array.length, indexRight);
+
+		// 当切到left和right都有一个元素了, 就可以进入merge阶段了.
+		return merge(sortedLeft, sortedRight);
+	}
+
+
+
+	function merge(left, right) {	
+		// 开一个merged把进来的元素稍后透过几个while loop给merge起来
+		const merged = [];
+
+		// 这里就是开始使用mergeRangeRecord.pop()来获得每一次在numArr和colorArr对应的位置
+		const indexRange = mergeRangeRecord.pop();
+
+		// i就是用来遍历indexRange的
+		let i = 0;
+
+		// 这里把merge部分的颜色变成淡灰色, 开始使用indexRange在colorArr对应的位置做更新了
+		updateMergeRangeToLightGrayNoDeepCopy(indexRange, numArr, colorArr, stepRecord);
+
+		// 以下就是第一个while loop把左右拿来对比再放进去merged了
+		let temp = null;
+		while (left.length > 0 && right.length > 0) {
+		    if (left[0] < right[0]) {
+		      temp = left.shift();
+		    } else {
+		      temp = right.shift();
+		    }
+
+			// 这就是如何使用indexRange在相对应的colorArr做更新了.
+			// 以下有类似的我会省略掉.
+			colorArr[indexRange[i]] = 'white'
+			let tempStatus = [numArr, colorArr];
+			stepRecord.push(JSON.parse(JSON.stringify(tempStatus)));
+
+			// 省略部分, 把颜色变红又变黄用了和上面一样的code.
+			...
+
+			// i + 1, 用来控制indexRange里面对应的元素.
+			i++;
+
+			// 把temp push到merged.
+			merged.push(temp);
+		}
+
+		// 第二个while loop把左或右剩下的元素补上去merged.
+		temp = null; 
+		while (left.length > 0 || right.length > 0) {
+		  	if(left.length > 0) {
+		  	  temp = left.shift();
+		  	} else {
+		  	  temp = right.shift()
+		  	}
+
+		  	// 省略部分, 把颜色变白, 变红又变黄用了和上面一样的code.
+		  	...
+
+		  	i++;
+		  	merged.push(temp);
+		}
+
+		// 返回是属于merge的.
+		return merged;
+	}
+
+
+	// 返回是属于getMergeSortSteps的.
+	return mergeSort(numArr, indexArr);
+}
+
+---------------------------------------------
+
+好了, 记录到这里, 给未来的自己, 希望你不记得会慢慢看记起来把. 我尽力了. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
