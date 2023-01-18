@@ -15,3 +15,5 @@ Sorting Visualizer is a great project for me. I consolidated the implementation 
 - On the home page, have a brief description of five sort algorithms, including bubble sort, selection sort, insertion sort, merge sort, and quick sort, also have a link for each algorithm for more information if the user wants to explore. 
 - The flexible data size of the array and delay speed are available to choose from based on user preference.  
 - During the sorting animation process, the user can clear anytime and regenerate a new random to play with.
+- Provides a visualization process of five sorting algorithms with a color notation to explain the status during the process of visualization animation. 
+- There is a time and space complexity for each sorting algorithm at the bottom of its page.
