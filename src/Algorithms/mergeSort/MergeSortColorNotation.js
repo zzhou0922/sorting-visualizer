@@ -54,7 +54,7 @@ const mergeSortColorNotation = () => {
                              backgroundColor: 'white',
                              whiteSpace: 'pre'
                             }}>
-                        <span className='b'>&nbsp; &nbsp; &nbsp; Ready For Element </span>
+                        <span className='b'>&nbsp; &nbsp; &nbsp; For New Element </span>
                     </div>
                 </div> 
 
@@ -76,7 +76,7 @@ const mergeSortColorNotation = () => {
                              backgroundColor: 'yellow',
                              whiteSpace: 'pre'
                             }}>
-                        <span className='b'>&nbsp; &nbsp; &nbsp; Done Assignment </span>
+                        <span className='b'>&nbsp; &nbsp; &nbsp; Done Assign </span>
                     </div>
                 </div> 
 
